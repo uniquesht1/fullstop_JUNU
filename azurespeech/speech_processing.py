@@ -6,8 +6,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Replace with your own subscription key and service region (e.g., "westus")
-subscription_key = os.getenv('AZURE_SPEECH_KEY')
-service_region = os.getenv('AZURE_SERVICE_REGION')  # e.g., "westus"
+subscription_key = os.environ['AZURE_SPEECH_KEY']
+service_region = "southeastasia" 
 filename = "output.wav"  # 16000 Hz, Mono
 
 def text_to_speech(text):
@@ -28,7 +28,7 @@ def text_to_speech(text):
                 print("Error details: {}".format(cancellation_details.error_details))
         print("Did you update the subscription info?")
 
-def speech_to_text():
+def speech_to_text(filename):
     audio_config = speechsdk.audio.AudioConfig(filename=filename)
     speech_config = speechsdk.SpeechConfig(subscription=subscription_key, region=service_region)
     speech_config.speech_recognition_language = "ne-NP"
@@ -38,6 +38,7 @@ def speech_to_text():
 
     if result.reason == speechsdk.ResultReason.RecognizedSpeech:
         print("Recognized: {}".format(result.text))
+        return result.text
     elif result.reason == speechsdk.ResultReason.NoMatch:
         print("No speech could be recognized: {}".format(result.no_match_details))
     elif result.reason == speechsdk.ResultReason.Canceled:
