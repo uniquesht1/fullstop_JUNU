@@ -5,8 +5,8 @@ const ChatbotUI = () => {
     <div className="flex h-screen bg-gray-100 text-gray-900">
       {/* Sidebar */}
       <div className="w-64 bg-white border-r shadow-md">
-        <div className="flex items-center justify-center h-16 font-bold text-blue-600 text-xl">
-          Chatbot
+        <div className="flex items-center justify-center w-1/2 font-bold text-blue-600 text-xl">
+          <img src="logo.svg"></img>
         </div>
       </div>
 
