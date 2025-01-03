@@ -1,2 +1,10 @@
 .env
 chroma/
+
+*/*/.env
+*/*/chroma/
+
+*/*/output.wav
+*/*/user_audio.wav
+
+*/*/*.pyc

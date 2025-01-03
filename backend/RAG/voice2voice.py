@@ -1,19 +1,32 @@
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
 import openai
 import os
+import sys
+from fastapi import FastAPI, HTTPException, UploadFile, File
+from fastapi.responses import FileResponse
+from pydantic import BaseModel
 from langchain.vectorstores import Chroma
 from langchain.embeddings import HuggingFaceEmbeddings
 from langchain.chat_models import ChatOpenAI
 
-# Environment setup
-openai.api_key = os.getenv("OPENAI_API_KEY")
+# Add the directory containing speech_processing.py to sys.path
+sys.path.append(os.path.abspath("../../azurespeech"))
+
+# Now you can import the module
+import speech_processing
+
+# Load environment variables from .env file
+from dotenv import load_dotenv
+load_dotenv()
+
+# Azure and OpenAI setup
+subscription_key = os.getenv('AZURE_SPEECH_KEY')
+service_region = os.getenv('AZURE_SERVICE_REGION')
+openai.api_key = os.getenv('OPENAI_API_KEY')
 CHROMA_PATH = "chroma"
 MODEL_NAME = "sentence-transformers/paraphrase-multilingual-mpnet-base-v2"
 GPT_MODEL = "gpt-4o-mini"
 
-# Initialize the components
+# Initialize vector store and chatbot
 def load_vector_store():
     emb_model = HuggingFaceEmbeddings(model_name=MODEL_NAME)
     return Chroma(persist_directory=CHROMA_PATH, embedding_function=emb_model)
@@ -50,39 +63,32 @@ def format_prompt(conversation_history, user_question, context_text, max_history
         context=context_text
     )
 
-# Initialize the model and vector store
-model = ChatOpenAI(model=GPT_MODEL)
-db = load_vector_store()
-
-# Define Pydantic model for input and output
-class UserInput(BaseModel):
-    question: str
-
-class ChatResponse(BaseModel):
-    answer: str
-
 # FastAPI app initialization
 app = FastAPI()
 
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["http://localhost:5173"],  # Frontend URL
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-
 # Store conversation history globally
 conversation_history = []
+db = load_vector_store()
 
-# API endpoint to handle chat
+# Define Pydantic model for input and output
+class ChatResponse(BaseModel):
+    answer: str
+    audio_url: str  # Include the audio URL for playback
+
 @app.post("/chat", response_model=ChatResponse)
-async def chat_with_bot(user_input: UserInput):
+async def chat_with_bot(file: UploadFile = File(...)):
     global conversation_history
 
-    user_question = user_input.question
+    # Read the audio file and process with STT (speech-to-text)
+    audio_file_path = "user_audio.wav"
+    with open(audio_file_path, "wb") as audio_file:
+        audio_file.write(await file.read())
+
+    # Convert the audio to text using STT (Speech-to-Text)
+    user_question = speech_processing.speech_to_text(audio_file_path)
+
+    if not user_question:
+        raise HTTPException(status_code=400, detail="Unable to recognize speech")
 
     # Query the vector store for context
     context_text = query_vector_store(db, user_question)
@@ -91,14 +97,29 @@ async def chat_with_bot(user_input: UserInput):
 
     # Format the prompt and generate response
     prompt = format_prompt(conversation_history, user_question, context_text)
-    response = model.invoke(prompt).content
+    response = ChatOpenAI(model=GPT_MODEL).invoke(prompt).content
 
     # Append the conversation history
     conversation_history.append({"user": user_question, "assistant": response})
 
-    return ChatResponse(answer=response)
+    # Convert response to speech and store it as an audio file
+    speech_output_path = "response_audio.wav"
+    speech_processing.text_to_speech(response)
 
-# Run the FastAPI server
+    # Return the response and audio URL for playback
+    audio_url = "/static/response_audio.wav"
+    return ChatResponse(answer=response, audio_url=audio_url)
+
+# Endpoint to serve the audio file
+@app.get("/static/{filename}")
+async def get_audio_file(filename: str):
+    file_path = f"./{filename}"
+    if os.path.exists(file_path):
+        return FileResponse(file_path)
+    else:
+        raise HTTPException(status_code=404, detail="File not found")
+
+# Run FastAPI server
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
