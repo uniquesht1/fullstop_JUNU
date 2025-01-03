@@ -1,20 +1,12 @@
-import { useState, useEffect } from "react";
-import axios from "axios";
+import React from 'react'
+import ChatbotUI from './components/Chatbot'
 
-function App() {
-    const [message, setMessage] = useState("");
-
-    useEffect(() => {
-        axios.get("http://localhost:8000/api/hello")
-            .then((response) => setMessage(response.data.message))
-            .catch((error) => console.error("Error fetching data:", error));
-    }, []);
-
-    return (
-        <div>
-            <h1>{message}</h1>
-        </div>
-    );
+const App = () => {
+  return (
+    <div>
+      <ChatbotUI />
+    </div>
+  )
 }
 
-export default App;
+export default App
