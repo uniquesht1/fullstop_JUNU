@@ -8,3 +8,23 @@ chroma/
 */*/user_audio.wav
 
 */*/*.pyc
+*/*/*.pyo
+*/*/*.pyd
+*/__pycache__/
+
+*/*/chroma/
+*/*/output.wav
+*/*/user_audio.wav
+*/*/__pycache__/
+
+*/*/.ipynb_checkpoints/
+*/*/__pycache__/
+*/*/.vscode/
+*/*/.idea/
+*/*/.DS_Store
+*/*/.ipynb_checkpoints/
+*/*/.vscode/
+*/*/.idea/
+*/*/.DS_Store
+*/*/.pytest_cache/
+*/*/.mypy
