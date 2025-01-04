@@ -2,7 +2,7 @@ import azure.cognitiveservices.speech as speechsdk
 import os
 from dotenv import load_dotenv
 
-# Load environment variables from .env file
+
 load_dotenv()
 
 # Replace with your own subscription key and service region (e.g., "westus")
