@@ -1,26 +1,59 @@
-import React from "react";
+import React, {useState} from "react";
+import { useChat } from "./zustand/useChat";
 
 const ChatbotUI = () => {
-  return (
-    <div className="flex h-screen bg-gray-100 text-gray-900">
-      {/* Sidebar */}
-      <div className="w-64 bg-white border-r shadow-md">
-        <div className="flex items-center justify-center w-1/2 font-bold text-blue-600 text-xl">
-          <img src="logo.svg"></img>
-        </div>
-      </div>
+const { chatText,setMessage} = useChat();
+// //   const {loading,sendMessage}= useSendMessage();
 
+// //   const handlePromptClick = async (prompt) => {
+// //     setMessage(prompt);
+// //     await sendMessage(prompt);
+// //     setMessage("");
+// const newValue = "Hello, how can I help you?";
+// setMessage(newValue);
+
+ // Initial chatText state is empty
+
+const handleChange = () => {
+  setChatText("This is the new content!"); // Change the value of chatText
+};
+
+//   }
+  return (
+    
+    <div className="flex h-screen bg-gray-100 text-gray-900">
       {/* Main Content */}
-      <div className="flex flex-col flex-1">
-        {/* Welcome Section */}
-        <div className="flex flex-col items-center justify-center flex-1 px-4 text-center">
-          <h1 className="text-3xl font-semibold">Welcome!</h1>
-          <p className="text-lg text-gray-500 mt-2">How can I help you?</p>
+      <div className="flex flex-col flex-1  items-center">
+
+        {chatText==="" &&(
+        <div className="flex items-center justify-between w-full px-4 py-2 flex-col h-5/6">
+        <img src="logo.svg" className="w-28 h-auto "></img>
+        <div className="flex flex-col items-center justify-center flex-1 text-center w-full ">
+            <img src="robo.svg" className="w-auto h-[25svh]"></img>
+          <img src="namaste.svg" className="w-28 ml-[4svh] h-auto "></img>
+          <p className="text-lg text-gray-500 mt-2">म तपाईंलाई कसरी सहायता गर्न सक्छु?</p>
         </div>
+        <div className="flex items-center space-x-14 h-1/5">
+            <button className="border-gray-300  border-2 text-black px-4 py-2 rounded-2xl  w-auto h-8 flex items-center justify-center"> citizenship
+        </button>
+        <button className="border-gray-300  border-2 text-black px-4 py-2 rounded-2xl  w-auto h-8 flex items-center justify-center"> citizenship
+        </button>
+        <button className="border-gray-300  border-2 text-black px-4 py-2 rounded-2xl  w-auto h-8 flex items-center justify-center"> citizenship
+        </button>
+        <button className="border-gray-300  border-2 text-black px-4 py-2 rounded-2xl  w-auto h-8 flex items-center justify-center"> citizenship
+        </button>
+        </div>
+        </div>
+        )}
+        
+        {chatText!=="" &&(
+        <div className="flex items-center justify-between w-full px-4 py-2 flex-col h-5/6">
+            hello </div>)}
+
 
         {/* Search Bar */}
-        <div className="flex justify-center px-4 pb-6">
-          <div className="flex items-center w-full max-w-md border rounded-lg shadow-sm bg-white px-4 py-2">
+        <div className="flex justify-center items-center px-4  w-full">
+          <div className="flex items-center w-full  border rounded-3xl shadow-sm bg-white px-4 py-2 mx-10">
             <input
               type="text"
               placeholder="Type your query here..."
