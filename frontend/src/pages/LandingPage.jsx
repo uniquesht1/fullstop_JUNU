@@ -23,7 +23,7 @@ const LandingPage = () => {
         <span className="text-sm  font-semibold">टाइप गर्नुहोस्</span>
       </Link>
         <div className='flex items-center justify-center flex-col'>
-            <img src="robo.svg" className="w-auto h-[30svh] -ml-4"></img>
+            <img src="robo2.svg" className="w-auto h-[30svh] -ml-4"></img>
           <img src="namaste.svg" className="w-24 mt-5  h-auto "></img>
           <p className="text-lg text-gray-500 ">म तपाईंलाई कसरी सहायता गर्न सक्छु?</p>
           </div>
