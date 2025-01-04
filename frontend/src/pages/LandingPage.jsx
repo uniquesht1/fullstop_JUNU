@@ -8,7 +8,7 @@ import { FaKeyboard, FaMicrophone } from "react-icons/fa";
 const LandingPage = () => {
   return (
     <div>
-      <div className="flex h-screen bg-gray-100 text-gray-900">
+      <div className="flex h-screen bg-custom-gradient text-gray-900">
       {/* Main Content */}
       <div className="flex flex-col flex-1  items-center mt-8">
 
