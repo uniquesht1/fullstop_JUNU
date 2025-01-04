@@ -1,7 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Sparkles } from 'lucide-react'; // Import Sparkles icon
+import { Send, Sparkles } from 'lucide-react';
 import TypingIndicator from '../components/TypingIndicator';
 import MessageContent from '../components/MessageContent';
+import { useNavigate } from 'react-router-dom';
+import { FaArrowRight } from 'react-icons/fa';
 
 const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
 const API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent';
@@ -12,8 +14,12 @@ const ChatUI = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const [error, setError] = useState(null);
+  const [showSuggestions, setShowSuggestions] = useState(true);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
+  const floatingContainerRef = useRef(null);
+  const [bottomPadding, setBottomPadding] = useState(120);
+  const navigate = useNavigate();
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -24,12 +30,32 @@ const ChatUI = () => {
     inputRef.current?.focus();
   }, [messages]);
 
-  const handleStart = () => {
-    setMessages([{ 
-      id: 1, 
-      text: "Hello! I'm Gemini. I can help you with various tasks. Try asking me something! \n\nI can help with:\n- Writing and analysis\n- Code and technical questions\n- Math and calculations\n- General knowledge", 
-      sender: "bot" 
-    }]);
+  useEffect(() => {
+    const updatePadding = () => {
+      if (floatingContainerRef.current) {
+        const height = floatingContainerRef.current.offsetHeight;
+        console.log("Floating Container Height:", height); // Debug here
+        setBottomPadding(height); // Add extra space
+      }
+    };
+
+    updatePadding();
+    window.addEventListener("resize", updatePadding);
+    return () => window.removeEventListener("resize", updatePadding);
+  }, []);
+
+  const handleNavigate = () => {
+    console.log("Navigating to voice chat...");
+    navigate('/voice'); // Navigate to /voice
+  };
+const handleStart = () => {
+    setMessages([
+      {
+        id: 1,
+        text: "Hello! I'm Gemini. I can help you with various tasks. Try asking me something! \n\nI can help with:\n- Writing and analysis\n- Code and technical questions\n- Math and calculations\n- General knowledge",
+        sender: "bot",
+      },
+    ]);
   };
 
   const callGeminiAPI = async (prompt) => {
@@ -40,12 +66,16 @@ const ChatUI = () => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          contents: [{
-            parts: [{
-              text: prompt
-            }]
-          }]
-        })
+          contents: [
+            {
+              parts: [
+                {
+                  text: prompt,
+                },
+              ],
+            },
+          ],
+        }),
       });
 
       if (!response.ok) {
@@ -66,29 +96,28 @@ const ChatUI = () => {
 
     if (inputValue.trim() && !isSubmitting) {
       setIsSubmitting(true);
-      
-      // Add user message
+      setShowSuggestions(false);
+
       const userMessage = {
         id: Date.now(),
         text: inputValue.trim(),
-        sender: "user"
+        sender: "user",
       };
-      
-      setMessages(prev => [...prev, userMessage]);
+
+      setMessages((prev) => [...prev, userMessage]);
       setInputValue("");
       setIsTyping(true);
-      
+
       try {
-        // Get response from Gemini
         const response = await callGeminiAPI(userMessage.text);
-        
+
         setIsTyping(false);
         const botMessage = {
           id: Date.now() + 1,
           text: response,
-          sender: "bot"
+          sender: "bot",
         };
-        setMessages(prev => [...prev, botMessage]);
+        setMessages((prev) => [...prev, botMessage]);
       } catch (err) {
         setError("Failed to get response from Gemini. Please try again.");
         setIsTyping(false);
@@ -104,52 +133,47 @@ const ChatUI = () => {
     }
   };
 
-  // Handle suggestion click
   const handleSuggestionClick = (suggestion) => {
-    setInputValue(suggestion); // Set the suggestion as the input value
-    inputRef.current.focus(); // Focus the input field
+    setInputValue(suggestion);
+    inputRef.current.focus();
   };
 
   return (
-    <div 
+    <div
       style={{
         background: 'linear-gradient(to bottom, #90bbe8, #FFFFFF)',
-        minHeight: '100vh', // Ensure the gradient covers the entire screen
+        minHeight: '100vh',
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
-        position: 'relative', // Needed for absolute positioning of images
+        position: 'relative',
       }}
     >
-      {/* Wrapper div with 15% white space on either side */}
-      <div 
+      <div
         style={{
-          width: '70%', // 100% - 15% on each side = 70%
-          maxWidth: '800px', // Optional: Set a max-width for larger screens
-          height: '100vh', // Ensure it takes full height
+          width: '70%',
+          maxWidth: '800px',
+          height: '100vh',
           display: 'flex',
           flexDirection: 'column',
           backgroundColor: 'transparent',
-          position: 'relative', // Needed for absolute positioning of images
+          position: 'relative',
         }}
       >
-        {/* Faded background image (robo.svg) */}
+        {/* Background Images */}
         <div
           className="absolute inset-0 bg-no-repeat bg-center bg-contain opacity-20 z-0"
-          style={{ 
-            backgroundImage: `url(robo.svg)`,
-            backgroundSize: '30%', // Adjust the size of the background image
-            backgroundPosition: 'center 50%', // Position the image at the top
+          style={{
+            backgroundImage: "url('/robo.svg')",
+            backgroundSize: '30%',
+            backgroundPosition: 'center 50%',
           }}
         ></div>
-
-  
-
-        {/* Additional image (chat.svg) positioned at the top right */}
-        <div
+   {/* Additional image (chat.svg) positioned at the top right */}
+   <div
           className="absolute bg-no-repeat bg-contain opacity-20 z-0"
           style={{ 
-            backgroundImage: `url(chat.svg)`,
+            backgroundImage: 'url(chat.svg)',
             backgroundSize: '20%', // Adjust the size of the image
             width: '200px', // Set a fixed width
             height: '200px', // Set a fixed height
@@ -162,7 +186,7 @@ const ChatUI = () => {
           <div
           className="absolute bg-no-repeat bg-contain opacity-20 z-0"
           style={{ 
-            backgroundImage: `url(chat.svg)`,
+            backgroundImage: 'url(chat.svg)',
             backgroundSize: '20%', // Adjust the size of the image
             width: '300px', // Set a fixed width
             height: '100px', // Set a fixed height
@@ -174,7 +198,7 @@ const ChatUI = () => {
           <div
           className="absolute bg-no-repeat bg-contain opacity-20 z-0"
           style={{ 
-            backgroundImage: `url(chat.svg)`,
+            backgroundImage: 'url(chat.svg)',
             backgroundSize: '20%', // Adjust the size of the image
             width: '300px', // Set a fixed width
             height: '100px', // Set a fixed height
@@ -187,7 +211,7 @@ const ChatUI = () => {
         <div
           className="absolute bg-no-repeat bg-contain opacity-20 z-0"
           style={{ 
-            backgroundImage: `url(chat.svg)`,
+            backgroundImage: 'url(chat.svg)',
             backgroundSize: '20%', // Adjust the size of the image
             width: '200px', // Set a fixed width
             height: '100px', // Set a fixed height
@@ -199,7 +223,7 @@ const ChatUI = () => {
         <div
           className="absolute bg-no-repeat bg-contain opacity-20 z-0"
           style={{ 
-            backgroundImage: `url(chat.svg)`,
+            backgroundImage: 'url(chat.svg)',
             backgroundSize: '50%', // Adjust the size of the image
             width: '200px', // Set a fixed width
             height: '100px', // Set a fixed height
@@ -212,7 +236,7 @@ const ChatUI = () => {
         <div
           className="absolute bg-no-repeat bg-contain opacity-20 z-0"
           style={{ 
-            backgroundImage: `url(chat.svg)`,
+            backgroundImage: 'url(chat.svg)',
             backgroundSize: '50%', // Adjust the size of the image
             width: '200px', // Set a fixed width
             height: '100px', // Set a fixed height
@@ -221,86 +245,94 @@ const ChatUI = () => {
           }}
           ></div>
 
-        
-
-
-        {/* Upper flex container (logo container) with transparent background and no shadow */}
         <div className="p-2 flex items-center justify-between mx-5 my-2 rounded-lg relative z-10">
-          <img src="logo.svg" className="w-32 h-auto" alt="Logo" /> {/* Reduced logo size */}
-          <span className="text-lg font-extrabold text-[#388ce5]">Chat</span> {/* Reduced text size */}
+          <img src="/logo.svg" className="w-32 h-auto" alt="Logo" />
+          <button
+         onClick={handleNavigate} // Handle click to navigate
+            className="absolute top-6 right-6 p-3 px-4 bg-white/90 hover:bg-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center gap-2"         
+        style={{ border: "2px solid #90bbe8" }}       
+      >         
+        <span className="text-blue-400 font-bold">Switch to Voice</span>
+        <FaArrowRight className="text-blue-400" size={20} /> 
+      </button>
         </div>
 
-        {/* Chat messages container without border */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4 mx-4 my-2 relative z-10">
-          {messages.map((message) => (
-            <div
-              key={message.id}
-              className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
-            >
-              <div
-                className={`max-w-[70%] rounded-lg p-3 ${
-                  message.sender === 'user'
-                    ? 'text-white shadow-md' // Removed bg-blue-500
-                    : 'bg-white text-gray-800 shadow-md'
-                }`}
-                style={{
-                  backgroundColor: message.sender === 'user' ? '#515AC3' : '', // Add custom color for user messages
-                }}
-              >
-                <MessageContent 
-                  content={message.text} 
-                  isUser={message.sender === 'user'} 
-                />
+        <div
+  className="flex-1 overflow-y-auto p-4 space-y-4 mx-4 my-2 relative z-10"
+  style={{
+    paddingBottom: `${bottomPadding}px`,
+    scrollbarWidth: 'none', /* For Firefox */
+    msOverflowStyle: 'none', /* For Internet Explorer and Edge */
+     maxHeight: '70vh',
+  }}
+  
+>
+  {messages.map((message) => (
+    <div
+      key={message.id}
+      className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
+    >
+      <div
+        className={`max-w-[70%] rounded-lg p-3 ${
+          message.sender === 'user'
+            ? 'text-white shadow-md'
+            : 'bg-white text-gray-800 shadow-md'
+        }`}
+        style={{
+          backgroundColor: message.sender === 'user' ? '#515AC3' : '',
+        }}
+      >
+        <MessageContent content={message.text} isUser={message.sender === 'user'} />
+      </div>
+    </div>
+  ))}
+
+  {isTyping && (
+    <div className="flex justify-start">
+      <TypingIndicator />
+    </div>
+  )}
+
+  {error && (
+    <div className="text-red-500 text-center p-2 border border-gray-200 rounded-lg">
+      {error}
+    </div>
+  )}
+
+  <div ref={messagesEndRef} />
+</div>
+
+
+        {/* Input and Suggestions */}
+        <div
+          ref={floatingContainerRef}
+          className={`fixed bottom-20 left-1/2 transform -translate-x-1/2 w-[65%] max-w-[750px] bg-white p-4 shadow-lg rounded-lg z-20 backdrop-blur-sm bg-opacity-95 ${
+            showSuggestions ? 'pb-4' : 'pb-2'
+          }`}
+        >
+          {showSuggestions && (
+            <>
+              <div className="flex items-center gap-2 mb-4">
+                <h3 className="text-lg font-semibold text-gray-700">Suggestions</h3>
+                <Sparkles className="w-5 h-5" style={{ color: '#87B5E5' }} />
               </div>
-            </div>
-          ))}
-          
-          {isTyping && (
-            <div className="flex justify-start">
-              <TypingIndicator />
-            </div>
+              <div className="flex gap-2 mb-4 overflow-x-auto whitespace-nowrap scrollbar-hide">
+                {[
+                  "नेपाली नागरिकता कसरी प्राप्त गर्न सकिन्छ?",
+                  "नागरिकता फारम कहाँ भर्न सकिन्छ?",
+                  "नागरिकताको लागि आवश्यक कागजात के के छन्?",
+                ].map((suggestion, index) => (
+                  <button
+                    key={index}
+                    onClick={() => handleSuggestionClick(suggestion)}
+                    className="bg-gray-100 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors"
+                  >
+                    {suggestion}
+                  </button>
+                ))}
+              </div>
+            </>
           )}
-          
-          {error && (
-            <div className="text-red-500 text-center p-2 border border-gray-200 rounded-lg">
-              {error}
-            </div>
-          )}
-          
-          <div ref={messagesEndRef} />
-        </div>
-
-        {/* Lower flex container (suggestions and input form) */}
-        <div className="bg-white p-4 shadow-lg mx-4 my-5 rounded-lg relative z-10 shadow-top">
-          {/* Suggestions heading with sparkle icon */}
-          <div className="flex items-center gap-2 mb-4">
-            <h3 className="text-lg font-semibold text-gray-700">Suggestions</h3>
-            <Sparkles className="w-5 h-5" style={{ color: '#87B5E5' }} />
-          </div>
-
-          {/* Horizontally scrollable suggestions container with hidden scrollbar */}
-          <div className="flex gap-2 mb-4 overflow-x-auto whitespace-nowrap scrollbar-hide">
-            {[
-              "नेपाली नागरिकता कसरी प्राप्त गर्न सकिन्छ?",
-              "नागरिकता फारम कहाँ भर्न सकिन्छ?",
-              "नागरिकताको लागि आवश्यक कागजात के के छन्?",
-              "नागरिकता प्रक्रियामा कति समय लाग्छ?",
-              "नागरिकता रिन्यु गर्न कति खर्च लाग्छ?",
-              "नागरिकता गुमाएको अवस्थामा के गर्ने?",
-              "नागरिकता फारम भर्ने प्रक्रिया के हो?",
-              "नागरिकता प्रमाणपत्र कहाँ बनाउन सकिन्छ?"
-            ].map((suggestion, index) => (
-              <button
-                key={index}
-                onClick={() => handleSuggestionClick(suggestion)}
-                className="bg-gray-100 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors"
-              >
-                {suggestion}
-              </button>
-            ))}
-          </div>
-
-          {/* Input form */}
           <form onSubmit={handleSubmit} className="flex space-x-2">
             <input
               ref={inputRef}
@@ -320,8 +352,6 @@ const ChatUI = () => {
             </button>
           </form>
         </div>
-
-        {/* Custom CSS for shadow-top and scrollbar */}
         <style>
           {`
             .shadow-top {
