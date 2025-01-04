@@ -45,9 +45,12 @@ def format_chat_prompt(conversation_history, user_question, context_text, max_hi
     """
 
     trimmed_history = conversation_history[-max_history:]
-
-    formatted_history = "\n".join([f"प्रयोगकर्ता: {entry['user']}\nसहायक: {entry['assistant']}" for entry in trimmed_history])
-
+    formatted_history = "\n".join([
+        f"{'प्रयोगकर्ता' if entry['sender'] == 'user' else 'सहायक'}: {entry['text']}"
+        for entry in trimmed_history
+    ])
+    
+    
     return prompt_template.format(
         conversation_history=formatted_history,
         user_question=user_question,
@@ -79,10 +82,10 @@ def format_voice_prompt(conversation_history, user_question, context_text, max_h
 
     # Format the conversation history in a natural dialogue flow
     formatted_history = "\n".join([
-        f"प्रयोगकर्ता: {entry['user']}\nसहायक: {entry['assistant']}" 
+        f"{'प्रयोगकर्ता' if entry['sender'] == 'user' else 'सहायक'}: {entry['text']}"
         for entry in trimmed_history
     ])
-
+    
     return prompt_template.format(
         conversation_history=formatted_history,
         user_question=user_question,

@@ -45,15 +45,6 @@ const ChatUI = () => {
     console.log("Navigating to voice chat...");
     navigate('/voice'); // Navigate to /voice
   };
-  const handleStart = () => {
-    setMessages([
-      {
-        id: 1,
-        text: "Hello! I'm Gemini. I can help you with various tasks. Try asking me something! \n\nI can help with:\n- Writing and analysis\n- Code and technical questions\n- Math and calculations\n- General knowledge",
-        sender: "bot",
-      },
-    ]);
-  };
 
   const callTextChatApi = async (prompt) => {
     try {
@@ -65,7 +56,7 @@ const ChatUI = () => {
         body: JSON.stringify({
           "mode": "text",
           "user_input": prompt,
-          "history": messages.map((message) => message.text).filter((text) => text.trim() !== "" && text.trim() !== prompt),
+          "history": messages,
         }),
       });
 

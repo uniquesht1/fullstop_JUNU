@@ -12,13 +12,12 @@ const MessageContent = ({ content, isUser }) => (
         <a {...props} className="text-blue-400 hover:underline" target="_blank" rel="noopener noreferrer" />
       ),
       // Style lists
-      ul: ({ node, ...props }) => (
-        <ul {...props} className="list-disc list-inside my-2" />
-      ),
       ol: ({ node, ...props }) => (
-        <ol {...props} className="list-decimal list-inside my-2" />
+        <ol {...props} style={{ listStyleType: 'decimal', margin: '0 0 0 1rem' }} />
       ),
-      // Style headings
+      li: ({ node, ...props }) => (
+        <li {...props} style={{ display: 'list-item', listStyleType: 'inherit' }} />
+      ), // Style headings
       h1: ({ node, ...props }) => (
         <h1 {...props} className="text-xl font-bold my-2" />
       ),
