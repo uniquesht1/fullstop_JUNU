@@ -1,14 +1,13 @@
 from pydantic import BaseModel
-from pydantic import Enum, Optional, List, Dict
+from typing import Optional, List, Dict
 
 class ChatRequest(BaseModel):
-    mode: Enum["text", "voice"]
+    mode: str
     user_input: Optional[str] = None
     history: List[Dict[str, str]] = []
 
 class ChatResponse(BaseModel):
     answer: str
-
 
 class TTSRequest(BaseModel):
     text: str

@@ -1,6 +1,6 @@
-from langchain.vectorstores import Chroma
-from langchain.embeddings import HuggingFaceEmbeddings
-from langchain.chat_models import ChatOpenAI
+from langchain_community.vectorstores import Chroma
+from langchain_community.embeddings import HuggingFaceEmbeddings
+from langchain_community.chat_models import ChatOpenAI
 
 from server.constants import CHROMA_PATH, EMBEDDING_MODEL_NAME, GPT_MODEL
 
@@ -10,7 +10,7 @@ def load_vector_store(embedding_model:str, persist_directory):
     """
 
     emb_model = HuggingFaceEmbeddings(model_name=embedding_model)
-    return Chroma(persist_directory, embedding_function)
+    return Chroma(persist_directory, emb_model)
 
 def query_vector_store(vector_store, user_input):
     """
@@ -103,6 +103,7 @@ def getResponseFromModel(user_input, conversation_history, mode):
     elif mode == "voice":
         prompt = format_voice_prompt(conversation_history, user_input, context_text)
     else:
+        print(mode)
         raise ValueError("Invalid mode. Choose 'text' or 'voice'.")
 
     response = ChatOpenAI(model=GPT_MODEL).invoke(prompt).content
