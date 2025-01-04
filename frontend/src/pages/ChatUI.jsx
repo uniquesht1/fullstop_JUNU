@@ -1,8 +1,6 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Send } from 'lucide-react';
 import TypingIndicator from '../components/TypingIndicator';
-
 import MessageContent from '../components/MessageContent';
 
 const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
@@ -111,71 +109,77 @@ const ChatUI = () => {
   };
 
   return (
-    <>
-      
-      <div className="flex flex-col h-screen max-w-2xl mx-auto">
-        <div className="bg-white border-b p-4">
-          <h1 className="text-xl font-semibold">Gemini Chat</h1>
-        </div>
-
-        <div className="flex-1 overflow-y-auto p-4 space-y-4">
-          {messages.map((message) => (
-            <div
-              key={message.id}
-              className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
-            >
-              <div
-                className={`max-w-[70%] rounded-lg p-3 ${
-                  message.sender === 'user'
-                    ? 'bg-blue-500 text-white'
-                    : 'bg-gray-100 text-gray-800'
-                }`}
-              >
-                <MessageContent 
-                  content={message.text} 
-                  isUser={message.sender === 'user'} 
-                />
-              </div>
-            </div>
-          ))}
-          
-          {isTyping && (
-            <div className="flex justify-start">
-              <TypingIndicator />
-            </div>
-          )}
-          
-          {error && (
-            <div className="text-red-500 text-center p-2">
-              {error}
-            </div>
-          )}
-          
-          <div ref={messagesEndRef} />
-        </div>
-
-        <form onSubmit={handleSubmit} className="border-t p-4 bg-white">
-          <div className="flex space-x-2">
-            <input
-              ref={inputRef}
-              type="text"
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              onKeyPress={handleKeyPress}
-              placeholder="Type your message..."
-              className="flex-1 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-            <button
-              type="submit"
-              disabled={!inputValue.trim() || isSubmitting}
-              className="bg-blue-500 text-white p-2 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-blue-600 transition-colors"
-            >
-              <Send className="w-5 h-5" />
-            </button>
-          </div>
-        </form>
+    <div className="flex flex-col h-screen max-w-2xl mx-auto">
+      {/* Logo container with "Chat" text */}
+      <div className="bg-white border-b p-4 flex items-center justify-start">
+        <img src="logo.svg" className="w-28 h-auto" alt="Logo" />
+        <span className="ml-2 text-xl font-extrabold">Chat</span>
       </div>
-    </>
+
+      {/* Centered text in the middle of the screen */}
+      <div className="flex-1 flex items-center justify-center">
+        <p className="text-3xl font-bold text-gray-700 ">म तपाईंलाई कसरी सहायता गर्न सक्छु?</p>
+      </div>
+
+      {/* Chat messages container */}
+      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        {messages.map((message) => (
+          <div
+            key={message.id}
+            className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
+          >
+            <div
+              className={`max-w-[70%] rounded-lg p-3 ${
+                message.sender === 'user'
+                  ? 'bg-blue-500 text-white'
+                  : 'bg-gray-100 text-gray-800'
+              }`}
+            >
+              <MessageContent 
+                content={message.text} 
+                isUser={message.sender === 'user'} 
+              />
+            </div>
+          </div>
+        ))}
+        
+        {isTyping && (
+          <div className="flex justify-start">
+            <TypingIndicator />
+          </div>
+        )}
+        
+        {error && (
+          <div className="text-red-500 text-center p-2">
+            {error}
+          </div>
+        )}
+        
+        <div ref={messagesEndRef} />
+      </div>
+
+      {/* Input form */}
+      <form onSubmit={handleSubmit} className="border-t p-4 bg-white">
+        <div className="flex space-x-2">
+          <input
+            ref={inputRef}
+            type="text"
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            onKeyPress={handleKeyPress}
+            placeholder="Type your message..."
+            className="flex-1 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <button
+            type="submit"
+            disabled={!inputValue.trim() || isSubmitting}
+            className="bg-blue-500 text-white p-2 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-blue-600 transition-colors"
+          >
+            <Send className="w-5 h-5" />
+          </button>
+        </div>
+      </form>
+    </div>
   );
 };
 
