@@ -17,7 +17,7 @@ static_path = Path(__file__).parent / "dist"
 # Mount the static folder to the root path
 app.mount("/", StaticFiles(directory=static_path, html=True), name="static")
 
-@app.post("/chat", response_model=ChatResponse)
+@app.post("/api/chat", response_model=ChatResponse)
 async def chat(request: ChatRequest):
     global conversation_history
 
@@ -37,7 +37,7 @@ async def chat(request: ChatRequest):
 
 
 # STT Endpoint
-@app.post("/stt", response_model=STTResponse, status_code=status.HTTP_200_OK)
+@app.post("/api/stt", response_model=STTResponse, status_code=status.HTTP_200_OK)
 async def speech_to_text(file: UploadFile = File(...)):
     if not file.content_type == "audio/wav":
         raise HTTPException(
@@ -68,7 +68,7 @@ async def speech_to_text(file: UploadFile = File(...)):
     return STTResponse(text=text, message="STT conversion successful")
 
 # TTS Endpoint
-@app.post("/tts", status_code=status.HTTP_200_OK)
+@app.post("/api/tts", status_code=status.HTTP_200_OK)
 async def text_to_speech(request: TTSRequest):
     text = request.text
     if not text:
