@@ -1,25 +1,18 @@
 import azure.cognitiveservices.speech as speechsdk
-import os
-from dotenv import load_dotenv
+from server.constants import subscription_key, service_region, sample_audio_file_path
 
+sample_audio_file_path = "sample_audio.wav"
 
-load_dotenv()
-
-# Replace with your own subscription key and service region (e.g., "westus")
-subscription_key = os.environ['AZURE_SPEECH_KEY']
-service_region = "southeastasia" 
-filename = "output.wav"  # 16000 Hz, Mono
-
-def text_to_speech(text):
+def text_to_speech_from_azure(text, speech_output_path):
     speech_config = speechsdk.SpeechConfig(subscription=subscription_key, region=service_region)
     speech_config.speech_synthesis_voice_name = "ne-NP-HemkalaNeural"
-    audio_config = speechsdk.audio.AudioOutputConfig(filename=filename)
+    audio_config = speechsdk.audio.AudioOutputConfig(filename=speech_output_path)
     speech_synthesizer = speechsdk.SpeechSynthesizer(speech_config=speech_config, audio_config=audio_config)
 
     result = speech_synthesizer.speak_text_async(text).get()
 
     if result.reason == speechsdk.ResultReason.SynthesizingAudioCompleted:
-        print(f"Speech synthesized to [{filename}] for text [{text}]")
+        print(f"Speech synthesized to [{speech_output_path}] for text [{text}]")
     elif result.reason == speechsdk.ResultReason.Canceled:
         cancellation_details = result.cancellation_details
         print("Speech synthesis canceled: {}".format(cancellation_details.reason))
@@ -28,7 +21,7 @@ def text_to_speech(text):
                 print("Error details: {}".format(cancellation_details.error_details))
         print("Did you update the subscription info?")
 
-def speech_to_text(filename):
+def speech_to_text_from_azure(filename):
     audio_config = speechsdk.audio.AudioConfig(filename=filename)
     speech_config = speechsdk.SpeechConfig(subscription=subscription_key, region=service_region)
     speech_config.speech_recognition_language = "ne-NP"
@@ -47,12 +40,3 @@ def speech_to_text(filename):
         if cancellation_details.reason == speechsdk.CancellationReason.Error:
             print("Error details: {}".format(cancellation_details.error_details))
 
-def main():
-    print("Type some text that you want to synthesize to speech...")
-    text = input()
-    text_to_speech(text)
-    print("Now recognizing from the synthesized speech...")
-    speech_to_text()
-
-if __name__ == "__main__":
-    main()

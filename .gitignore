@@ -1,5 +1,7 @@
 .env
 chroma/
+venv/
+__pycache__/
 
 */*/.env
 */*/chroma/
@@ -28,4 +30,11 @@ chroma/
 */*/.DS_Store
 */*/.pytest_cache/
 */*/.mypy
+venv/
+dist/
+azurespeech/
+backend/
 
+node_modules/
+output_audio.wav
+uploaded_audio.wav
