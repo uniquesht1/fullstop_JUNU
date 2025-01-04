@@ -1,31 +1,15 @@
-import React, {useState} from "react";
-import { useChat } from "./zustand/useChat";
+
+
+import React from 'react'
 
 const ChatbotUI = () => {
-const { chatText,setMessage} = useChat();
-// //   const {loading,sendMessage}= useSendMessage();
-
-// //   const handlePromptClick = async (prompt) => {
-// //     setMessage(prompt);
-// //     await sendMessage(prompt);
-// //     setMessage("");
-// const newValue = "Hello, how can I help you?";
-// setMessage(newValue);
-
- // Initial chatText state is empty
-
-const handleChange = () => {
-  setChatText("This is the new content!"); // Change the value of chatText
-};
-
-//   }
   return (
-    
-    <div className="flex h-screen bg-gray-100 text-gray-900">
+    <div>
+      <div className="flex h-screen bg-gray-100 text-gray-900">
       {/* Main Content */}
       <div className="flex flex-col flex-1  items-center">
 
-        {chatText==="" &&(
+        
         <div className="flex items-center justify-between w-full px-4 py-2 flex-col h-5/6">
         <img src="logo.svg" className="w-28 h-auto "></img>
         <div className="flex flex-col items-center justify-center flex-1 text-center w-full ">
@@ -44,11 +28,9 @@ const handleChange = () => {
         </button>
         </div>
         </div>
-        )}
+      
         
-        {chatText!=="" &&(
-        <div className="flex items-center justify-between w-full px-4 py-2 flex-col h-5/6">
-            hello </div>)}
+    
 
 
         {/* Search Bar */}
@@ -80,9 +62,12 @@ const handleChange = () => {
             </button>
           </div>
         </div>
+
       </div>
     </div>
-  );
-};
+    </div>
+  )
+}
 
-export default ChatbotUI;
+export default ChatbotUI
+
