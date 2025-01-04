@@ -8,7 +8,6 @@ import {
 import { Link } from "react-router-dom";
 import html2canvas from "html2canvas";
 import Waveform from "../components/Waveform"; // Import the Waveform component
-import {Link} from 'react-router-dom';
 
 const VoiceUI = () => {
   const [isRecording, setIsRecording] = useState(false);
