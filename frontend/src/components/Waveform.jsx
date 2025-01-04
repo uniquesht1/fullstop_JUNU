@@ -13,7 +13,6 @@ const Waveform = ({ waveformData, waveformRef }) => {
             </feMerge>
           </filter>
         </defs>
-        {/* Waveform Path with Reduced Opacity */}
         <path
           d={`M 0,50 ${waveformData
             .map((value, index) => `L ${index},${value}`)
@@ -21,7 +20,7 @@ const Waveform = ({ waveformData, waveformRef }) => {
           fill="none"
           stroke="#BEE3F8"
           strokeWidth="1"
-          opacity="0.4" // Reduced transparency
+          opacity="0.4" 
         />
         <path
           d={`M 0,50 ${waveformData
@@ -31,7 +30,7 @@ const Waveform = ({ waveformData, waveformRef }) => {
           stroke="#90BBE8"
           strokeWidth="2"
           filter="url(#glow)"
-          opacity="0.6" // Reduced transparency
+          opacity="0.6" 
         />
       </svg>
     </div>

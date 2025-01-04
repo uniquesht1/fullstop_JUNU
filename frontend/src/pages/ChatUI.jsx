@@ -232,13 +232,14 @@ const ChatUI = () => {
             <img src="/logo.svg" className="w-32 h-auto cursor-pointer" alt="Logo" />
           </Link>
           <button
-            onClick={handleNavigate} // Handle click to navigate
-            className="absolute top-7 right-6 p-3 px-4 bg-white/90 hover:bg-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center gap-2"
-            style={{ border: "2px solid #90bbe8" }}
-          >
-            <span className="text-[#8ab7e2] font-bold pr-6 text-xl">Switch to Voice</span>
-            <FaArrowRight className="text-[#8ab7e2]" size={20} />
-          </button>
+  onClick={handleNavigate} // Handle click to navigate
+  className="absolute top-7 right-6 p-3 px-4 bg-white/90 hover:bg-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center gap-2"
+  style={{ border: "2px solid #90bbe8" }}
+>
+  <span className="text-[#8ab7e2] font-black pr-6 text-xl">माइक्रोफोन प्रयोग गर्नुहोस्</span>
+
+  <FaArrowRight className="text-[#8ab7e2]" size={20} />
+</button>
 
         </div>
 
@@ -296,7 +297,7 @@ const ChatUI = () => {
           {showSuggestions && (
             <>
               <div className="flex items-center gap-2 mb-4">
-                <h3 className="text-lg font-semibold text-gray-700">Suggestions</h3>
+                <h3 className="text-lg font-semibold text-gray-700">सुझावहरू</h3>
                 <Sparkles className="w-5 h-5" style={{ color: '#87B5E5' }} />
               </div>
               <div className="flex gap-2 mb-4 overflow-x-auto whitespace-nowrap scrollbar-hide">
@@ -323,7 +324,7 @@ const ChatUI = () => {
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               onKeyPress={handleKeyPress}
-              placeholder="Type your message..."
+              placeholder="टाइप गर्नुहोस्..."
               className="flex-1 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
             <button
