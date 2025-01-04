@@ -1,6 +1,8 @@
 from fastapi import FastAPI, HTTPException, UploadFile, File
 from fastapi.responses import FileResponse
 from fastapi import status
+from fastapi.staticfiles import StaticFiles
+from pathlib import Path
 
 from server.index_docs import generate_data_store
 from server.inference import getResponseFromModel
@@ -8,6 +10,12 @@ from server.speechprocessing import speech_to_text_from_azure, text_to_speech_fr
 from server.model import ChatResponse, ChatRequest, STTResponse, TTSResponse, TTSRequest
 
 app = FastAPI()
+
+# Set up the path to the static folder
+static_path = Path(__file__).parent / "dist"
+
+# Mount the static folder to the root path
+app.mount("/", StaticFiles(directory=static_path, html=True), name="static")
 
 @app.post("/chat", response_model=ChatResponse)
 async def chat(request: ChatRequest):
