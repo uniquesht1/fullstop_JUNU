@@ -45,7 +45,7 @@ const ChatUI = () => {
     console.log("Navigating to voice chat...");
     navigate('/voice'); // Navigate to /voice
   };
-const handleStart = () => {
+  const handleStart = () => {
     setMessages([
       {
         id: 1,
@@ -160,10 +160,10 @@ const handleStart = () => {
             backgroundPosition: 'center 50%',
           }}
         ></div>
-   {/* Additional image (chat.svg) positioned at the top right */}
-   <div
+        {/* Additional image (chat.svg) positioned at the top right */}
+        <div
           className="absolute bg-no-repeat bg-contain opacity-20 z-0"
-          style={{ 
+          style={{
             backgroundImage: 'url(chat.svg)',
             backgroundSize: '20%', // Adjust the size of the image
             width: '200px', // Set a fixed width
@@ -173,10 +173,10 @@ const handleStart = () => {
           }}
         ></div>
 
-       
-          <div
+
+        <div
           className="absolute bg-no-repeat bg-contain opacity-20 z-0"
-          style={{ 
+          style={{
             backgroundImage: 'url(chat.svg)',
             backgroundSize: '20%', // Adjust the size of the image
             width: '300px', // Set a fixed width
@@ -213,7 +213,7 @@ const handleStart = () => {
 
         <div
           className="absolute bg-no-repeat bg-contain opacity-20 z-0"
-          style={{ 
+          style={{
             backgroundImage: 'url(chat.svg)',
             backgroundSize: '50%', // Adjust the size of the image
             width: '200px', // Set a fixed width
@@ -237,17 +237,18 @@ const handleStart = () => {
         ></div>
 
         <div className="p-2 flex items-center justify-between mx-5 my-2 rounded-lg relative z-10">
-        <Link to="/">
+          <Link to="/">
             <img src="/logo.svg" className="w-32 h-auto cursor-pointer" alt="Logo" />
           </Link>
           <button
-         onClick={handleNavigate} // Handle click to navigate
-            className="absolute top-6 right-6 p-3 px-4 bg-white/90 hover:bg-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center gap-2"         
-        style={{ border: "2px solid #90bbe8" }}       
-      >         
-        <span className="text-blue-400 font-bold">Switch to Voice</span>
-        <FaArrowRight className="text-blue-400" size={20} /> 
-      </button>
+            onClick={handleNavigate} // Handle click to navigate
+            className="absolute top-7 right-6 p-3 px-4 bg-white/90 hover:bg-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center gap-2"
+            style={{ border: "2px solid #90bbe8" }}
+          >
+            <span className="text-[#8ab7e2] font-bold pr-6 text-xl">Switch to Voice</span>
+            <FaArrowRight className="text-[#8ab7e2]" size={20} />
+          </button>
+
         </div>
 
         <div
@@ -267,8 +268,8 @@ const handleStart = () => {
             >
               <div
                 className={`max-w-[70%] rounded-lg p-3 ${message.sender === 'user'
-                    ? 'text-white shadow-md'
-                    : 'bg-white text-gray-800 shadow-md'
+                  ? 'text-white shadow-md'
+                  : 'bg-white text-gray-800 shadow-md'
                   }`}
                 style={{
                   backgroundColor: message.sender === 'user' ? '#515AC3' : '',
