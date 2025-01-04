@@ -1,7 +1,6 @@
 from fastapi import FastAPI, HTTPException, UploadFile, File
 from fastapi.responses import FileResponse
 from fastapi import status
-from fastapi.staticfiles import StaticFiles
 from pathlib import Path
 
 import subprocess
@@ -13,13 +12,7 @@ from server.model import ChatResponse, ChatRequest, STTResponse, TTSResponse, TT
 
 app = FastAPI()
 
-# Set up the path to the static folder
-static_path = Path(__file__).parent / "dist"
-
-# Mount the static folder to the root path
-app.mount("/", StaticFiles(directory=static_path, html=True), name="static")
-
-@app.post("/api/chat", response_model=ChatResponse)
+@app.post("/chat", response_model=ChatResponse)
 async def chat(request: ChatRequest):
     global conversation_history
 
@@ -36,10 +29,8 @@ async def chat(request: ChatRequest):
 
     return ChatResponse(answer=response)
 
-
-
 # STT Endpoint
-@app.post("/api/stt", response_model=STTResponse, status_code=status.HTTP_200_OK)
+@app.post("/stt", response_model=STTResponse, status_code=status.HTTP_200_OK)
 async def speech_to_text(file: UploadFile = File(...)):
     if not file.content_type == "audio/wav":
         raise HTTPException(
@@ -70,7 +61,7 @@ async def speech_to_text(file: UploadFile = File(...)):
     return STTResponse(text=text, message="STT conversion successful")
 
 # TTS Endpoint
-@app.post("/api/tts", status_code=status.HTTP_200_OK)
+@app.post("/tts", response_model=TTSResponse, status_code=status.HTTP_200_OK)
 async def text_to_speech(request: TTSRequest):
     text = request.text
     if not text:
@@ -92,7 +83,6 @@ async def text_to_speech(request: TTSRequest):
     # Return the generated audio file as a response
     return FileResponse(speech_output_path, media_type="audio/wav", headers={"Content-Disposition": "attachment; filename=output_audio.wav"})
 
-
 import subprocess
 
 def build_frontend():
@@ -105,6 +95,6 @@ def build_frontend():
 
 if __name__ == "__main__":
     generate_data_store()
-    build_frontend()
+    # build_frontend()
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)

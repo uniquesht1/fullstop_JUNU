@@ -5,9 +5,6 @@ import MessageContent from '../components/MessageContent';
 import { useNavigate, Link } from 'react-router-dom';
 import { FaArrowRight } from 'react-icons/fa';
 
-const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
-const API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent';
-
 const ChatUI = () => {
   const [messages, setMessages] = useState([]);
   const [inputValue, setInputValue] = useState("");
@@ -48,8 +45,7 @@ const ChatUI = () => {
     console.log("Navigating to voice chat...");
     navigate('/voice'); // Navigate to /voice
   };
-  
-const handleStart = () => {
+  const handleStart = () => {
     setMessages([
       {
         id: 1,
@@ -59,23 +55,17 @@ const handleStart = () => {
     ]);
   };
 
-  const callGeminiAPI = async (prompt) => {
+  const callTextChatApi = async (prompt) => {
     try {
-      const response = await fetch(`${API_URL}?key=${GEMINI_API_KEY}`, {
+      const response = await fetch(`/api/chat`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          contents: [
-            {
-              parts: [
-                {
-                  text: prompt,
-                },
-              ],
-            },
-          ],
+          "mode": "text",
+          "user_input": prompt,
+          "history": messages.map((message) => message.text).filter((text) => text.trim() !== "" && text.trim() !== prompt),
         }),
       });
 
@@ -84,7 +74,7 @@ const handleStart = () => {
       }
 
       const data = await response.json();
-      return data.candidates[0].content.parts[0].text;
+      return data.answer;
     } catch (err) {
       console.error('Error calling Gemini API:', err);
       throw err;
@@ -110,8 +100,8 @@ const handleStart = () => {
       setIsTyping(true);
 
       try {
-        const response = await callGeminiAPI(userMessage.text);
-
+        const response = await callTextChatApi(userMessage.text);
+        console.log(response)
         setIsTyping(false);
         const botMessage = {
           id: Date.now() + 1,
@@ -170,11 +160,23 @@ const handleStart = () => {
             backgroundPosition: 'center 50%',
           }}
         ></div>
-
-
-          <div
+        {/* Additional image (chat.svg) positioned at the top right */}
+        <div
           className="absolute bg-no-repeat bg-contain opacity-20 z-0"
-          style={{ 
+          style={{
+            backgroundImage: 'url(chat.svg)',
+            backgroundSize: '20%', // Adjust the size of the image
+            width: '200px', // Set a fixed width
+            height: '200px', // Set a fixed height
+            top: '20%', // Position at the top
+            right: '25%', // Position at the right
+          }}
+        ></div>
+
+
+        <div
+          className="absolute bg-no-repeat bg-contain opacity-20 z-0"
+          style={{
             backgroundImage: 'url(chat.svg)',
             backgroundSize: '20%', // Adjust the size of the image
             width: '300px', // Set a fixed width
@@ -183,11 +185,23 @@ const handleStart = () => {
             left: '100%', // Position at the right
           }}
         ></div>
-        
-        
+
         <div
           className="absolute bg-no-repeat bg-contain opacity-20 z-0"
-          style={{ 
+          style={{
+            backgroundImage: 'url(chat.svg)',
+            backgroundSize: '20%', // Adjust the size of the image
+            width: '300px', // Set a fixed width
+            height: '100px', // Set a fixed height
+            top: '30%', // Position at the top
+            left: '100%', // Position at the right
+          }}
+        ></div>
+
+
+        <div
+          className="absolute bg-no-repeat bg-contain opacity-20 z-0"
+          style={{
             backgroundImage: 'url(chat.svg)',
             backgroundSize: '20%', // Adjust the size of the image
             width: '200px', // Set a fixed width
@@ -197,12 +211,22 @@ const handleStart = () => {
           }}
         ></div>
 
-  
-
-        
         <div
           className="absolute bg-no-repeat bg-contain opacity-20 z-0"
-          style={{ 
+          style={{
+            backgroundImage: 'url(chat.svg)',
+            backgroundSize: '50%', // Adjust the size of the image
+            width: '200px', // Set a fixed width
+            height: '100px', // Set a fixed height
+            top: '70%', // Position at the top
+            right: '90%', // Position at the right
+          }}
+        ></div>
+
+
+        <div
+          className="absolute bg-no-repeat bg-contain opacity-20 z-0"
+          style={{
             backgroundImage: 'url(chat.svg)',
             backgroundSize: '50%', // Adjust the size of the image
             width: '200px', // Set a fixed width
@@ -210,10 +234,10 @@ const handleStart = () => {
             top: '60%', // Position at the top
             left: '90%', // Position at the right
           }}
-          ></div>
+        ></div>
 
         <div className="p-2 flex items-center justify-between mx-5 my-2 rounded-lg relative z-10">
-        <Link to="/">
+          <Link to="/">
             <img src="/logo.svg" className="w-32 h-auto cursor-pointer" alt="Logo" />
           </Link>
           <button
@@ -229,57 +253,55 @@ const handleStart = () => {
         </div>
 
         <div
-  className="flex-1 overflow-y-auto p-4 space-y-4 mx-4 my-2 relative z-10"
-  style={{
-    paddingBottom: `${bottomPadding}px`,
-    scrollbarWidth: 'none', /* For Firefox */
-    msOverflowStyle: 'none', /* For Internet Explorer and Edge */
-     maxHeight: '70vh',
-  }}
-  
->
-  {messages.map((message) => (
-    <div
-      key={message.id}
-      className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
-    >
-      <div
-        className={`max-w-[70%] rounded-lg p-3 ${
-          message.sender === 'user'
-            ? 'text-white shadow-md'
-            : 'bg-white text-gray-800 shadow-md'
-        }`}
-        style={{
-          backgroundColor: message.sender === 'user' ? '#515AC3' : '',
-        }}
-      >
-        <MessageContent content={message.text} isUser={message.sender === 'user'} />
-      </div>
-    </div>
-  ))}
+          className="flex-1 overflow-y-auto p-4 space-y-4 mx-4 my-2 relative z-10"
+          style={{
+            paddingBottom: `${bottomPadding}px`,
+            scrollbarWidth: 'none', /* For Firefox */
+            msOverflowStyle: 'none', /* For Internet Explorer and Edge */
+            maxHeight: '70vh',
+          }}
 
-  {isTyping && (
-    <div className="flex justify-start">
-      <TypingIndicator />
-    </div>
-  )}
+        >
+          {messages.map((message) => (
+            <div
+              key={message.id}
+              className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
+            >
+              <div
+                className={`max-w-[70%] rounded-lg p-3 ${message.sender === 'user'
+                  ? 'text-white shadow-md'
+                  : 'bg-white text-gray-800 shadow-md'
+                  }`}
+                style={{
+                  backgroundColor: message.sender === 'user' ? '#515AC3' : '',
+                }}
+              >
+                <MessageContent content={message.text} isUser={message.sender === 'user'} />
+              </div>
+            </div>
+          ))}
 
-  {error && (
-    <div className="text-red-500 text-center p-2 border border-gray-200 rounded-lg">
-      {error}
-    </div>
-  )}
+          {isTyping && (
+            <div className="flex justify-start">
+              <TypingIndicator />
+            </div>
+          )}
 
-  <div ref={messagesEndRef} />
-</div>
+          {error && (
+            <div className="text-red-500 text-center p-2 border border-gray-200 rounded-lg">
+              {error}
+            </div>
+          )}
+
+          <div ref={messagesEndRef} />
+        </div>
 
 
         {/* Input and Suggestions */}
         <div
           ref={floatingContainerRef}
-          className={`fixed bottom-20 left-1/2 transform -translate-x-1/2 w-[65%] max-w-[750px] bg-white p-4 shadow-lg rounded-lg z-20 backdrop-blur-sm bg-opacity-95 ${
-            showSuggestions ? 'pb-4' : 'pb-2'
-          }`}
+          className={`fixed bottom-20 left-1/2 transform -translate-x-1/2 w-[65%] max-w-[750px] bg-white p-4 shadow-lg rounded-lg z-20 backdrop-blur-sm bg-opacity-95 ${showSuggestions ? 'pb-4' : 'pb-2'
+            }`}
         >
           {showSuggestions && (
             <>
