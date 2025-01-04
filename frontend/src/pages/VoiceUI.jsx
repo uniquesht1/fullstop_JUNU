@@ -234,7 +234,7 @@ const VoiceUI = () => {
         className="absolute top-7 right-6 p-3 px-4 bg-white/90 hover:bg-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center gap-2"
         style={{ border: "2px solid #90bbe8" }}
       >
-        <span className="text-[#8ab7e2] font-bold pr-6 text-xl">Switch to Chat</span>
+  <span className="text-[#8ab7e2] font-black pr-6 text-xl">च्याटमा जानुहोस्</span>
         <FaArrowRight className="text-[#8ab7e2]" size={20} />
       </Link>
       {/* Circle Container */}
