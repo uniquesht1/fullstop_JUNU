@@ -4,7 +4,7 @@ from typing import Optional, List, Dict
 class ChatRequest(BaseModel):
     mode: str
     user_input: Optional[str] = None
-    history: List[Dict[str, str]] = []
+    history: str
 
 class ChatResponse(BaseModel):
     answer: str
