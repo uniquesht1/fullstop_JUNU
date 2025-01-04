@@ -5,6 +5,7 @@ import {
   FaArrowRight,
   FaDownload,
 } from "react-icons/fa";
+import { Link } from "react-router-dom";
 import html2canvas from "html2canvas";
 import Waveform from "../components/Waveform"; // Import the Waveform component
 
