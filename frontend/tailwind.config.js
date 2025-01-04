@@ -7,6 +7,9 @@ export default {
   ],
   theme: {
   	extend: {
+      backgroundImage: {
+        'custom-gradient': 'linear-gradient(90deg, rgba(185,223,247,1) 0%, rgba(255,255,255,1) 33%, rgba(255,255,255,1) 66%, rgba(185,223,247,1) 100%)',
+      },
   		borderRadius: {
   			lg: 'var(--radius)',
   			md: 'calc(var(--radius) - 2px)',
