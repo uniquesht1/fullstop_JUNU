@@ -7,6 +7,7 @@ import {
 } from "react-icons/fa";
 import html2canvas from "html2canvas";
 import Waveform from "../components/Waveform"; // Import the Waveform component
+import {Link} from 'react-router-dom';
 
 const VoiceUI = () => {
   const [isRecording, setIsRecording] = useState(false);
@@ -151,7 +152,9 @@ const VoiceUI = () => {
         </div>
       )}
       <div className="pl-6 absolute top-0 left-0 items-start rounded-lg z-10">
-        <img src="logo.svg" className="w-32 h-auto" alt="Logo" />
+          <Link to="/">
+            <img src="/logo.svg" className="w-32 h-auto cursor-pointer" alt="Logo" />
+          </Link>
       </div>
       <Link 
         to="/chat"

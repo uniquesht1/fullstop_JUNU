@@ -4,6 +4,7 @@ import TypingIndicator from '../components/TypingIndicator';
 import MessageContent from '../components/MessageContent';
 import { useNavigate } from 'react-router-dom';
 import { FaArrowRight } from 'react-icons/fa';
+import { Link } from 'react-router-dom'; 
 
 const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
 const API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent';
@@ -169,19 +170,7 @@ const handleStart = () => {
             backgroundPosition: 'center 50%',
           }}
         ></div>
-   {/* Additional image (chat.svg) positioned at the top right */}
-   <div
-          className="absolute bg-no-repeat bg-contain opacity-20 z-0"
-          style={{ 
-            backgroundImage: 'url(chat.svg)',
-            backgroundSize: '20%', // Adjust the size of the image
-            width: '200px', // Set a fixed width
-            height: '200px', // Set a fixed height
-            top: '20%', // Position at the top
-            right: '25%', // Position at the right
-          }}
-        ></div>
-
+   
        
           <div
           className="absolute bg-no-repeat bg-contain opacity-20 z-0"
@@ -195,17 +184,7 @@ const handleStart = () => {
           }}
         ></div>
 
-          <div
-          className="absolute bg-no-repeat bg-contain opacity-20 z-0"
-          style={{ 
-            backgroundImage: 'url(chat.svg)',
-            backgroundSize: '20%', // Adjust the size of the image
-            width: '300px', // Set a fixed width
-            height: '100px', // Set a fixed height
-            top: '30%', // Position at the top
-            left: '100%', // Position at the right
-          }}
-        ></div>
+     
         
         
         <div
@@ -220,17 +199,6 @@ const handleStart = () => {
           }}
         ></div>
 
-        <div
-          className="absolute bg-no-repeat bg-contain opacity-20 z-0"
-          style={{ 
-            backgroundImage: 'url(chat.svg)',
-            backgroundSize: '50%', // Adjust the size of the image
-            width: '200px', // Set a fixed width
-            height: '100px', // Set a fixed height
-            top: '70%', // Position at the top
-            right: '90%', // Position at the right
-          }}
-        ></div>
 
         
         <div
@@ -245,17 +213,19 @@ const handleStart = () => {
           }}
           ></div>
 
-        <div className="p-2 flex items-center justify-between mx-5 my-2 rounded-lg relative z-10">
-          <img src="/logo.svg" className="w-32 h-auto" alt="Logo" />
-          <button
-         onClick={handleNavigate} // Handle click to navigate
-            className="absolute top-6 right-6 p-3 px-4 bg-white/90 hover:bg-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center gap-2"         
-        style={{ border: "2px solid #90bbe8" }}       
-      >         
-        <span className="text-blue-400 font-bold">Switch to Voice</span>
-        <FaArrowRight className="text-blue-400" size={20} /> 
-      </button>
-        </div>
+<div className="p-2 flex items-center justify-between mx-5 my-2 rounded-lg relative z-10">
+  <Link to="/" onClick={handleNavigate}>
+    <img src="/logo.svg" className="w-32 h-auto cursor-pointer" alt="Logo" />
+  </Link>
+  <button
+    onClick={handleNavigate} // Handle click to navigate
+    className="absolute top-6 right-6 p-3 px-4 bg-white/90 hover:bg-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center gap-2"         
+    style={{ border: "2px solid #90bbe8" }}       
+  >         
+    <span className="text-blue-400 font-bold">Switch to Voice</span>
+    <FaArrowRight className="text-blue-400" size={20} /> 
+  </button>
+</div>
 
         <div
   className="flex-1 overflow-y-auto p-4 space-y-4 mx-4 my-2 relative z-10"
