@@ -1,9 +1,9 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { Send } from 'lucide-react';
-import TypingIndicator from './TypingIndicator';
-import LandingPage from './LandingPage';
-import MessageContent from './MessageContent';
+import TypingIndicator from '../components/TypingIndicator';
+
+import MessageContent from '../components/MessageContent';
 
 const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
 const API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent';
@@ -13,8 +13,6 @@ const ChatUI = () => {
   const [inputValue, setInputValue] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
-  const [showLanding, setShowLanding] = useState(true);
-  const [landingOpacity, setLandingOpacity] = useState(1);
   const [error, setError] = useState(null);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
@@ -114,12 +112,6 @@ const ChatUI = () => {
 
   return (
     <>
-      {showLanding && 
-        <LandingPage 
-          onStart={handleStart} 
-          style={{ opacity: landingOpacity }}
-        />
-      }
       
       <div className="flex flex-col h-screen max-w-2xl mx-auto">
         <div className="bg-white border-b p-4">

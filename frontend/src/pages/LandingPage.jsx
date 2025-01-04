@@ -1,8 +1,9 @@
 
 
 import React from 'react'
+import { Link } from 'react-router-dom'
 
-const ChatbotUI = () => {
+const LandingPage = () => {
   return (
     <div>
       <div className="flex h-screen bg-gray-100 text-gray-900">
@@ -28,13 +29,24 @@ const ChatbotUI = () => {
         </button>
         </div>
         </div>
-      
+      <div className="flex  items-center gap-8  mx-auto py-2 h-1/6">
         
-    
+        <Link 
+        to="/chat"
+        className="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition-colors"
+      >
+        Start Chatting
+      </Link>
+      <Link 
+        to="/chat"
+        className="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition-colors"
+      >
+        Start Yapping
+      </Link>
 
-
+</div>
         {/* Search Bar */}
-        <div className="flex justify-center items-center px-4  w-full">
+        {/* <div className="flex justify-center items-center px-4  w-full">
           <div className="flex items-center w-full  border rounded-3xl shadow-sm bg-white px-4 py-2 mx-10">
             <input
               type="text"
@@ -61,7 +73,7 @@ const ChatbotUI = () => {
               </svg>
             </button>
           </div>
-        </div>
+        </div> */}
 
       </div>
     </div>
@@ -69,5 +81,5 @@ const ChatbotUI = () => {
   )
 }
 
-export default ChatbotUI
+export default LandingPage
 
