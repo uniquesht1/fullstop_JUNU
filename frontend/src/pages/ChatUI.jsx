@@ -101,7 +101,7 @@ const ChatUI = () => {
         };
         setMessages((prev) => [...prev, botMessage]);
       } catch (err) {
-        setError("Failed to get response from Gemini. Please try again.");
+        setError("Failed to get response from Junu. Please try again.");
         setIsTyping(false);
       } finally {
         setIsSubmitting(false);
