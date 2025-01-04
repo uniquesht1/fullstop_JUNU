@@ -14,24 +14,24 @@ const LandingPage = () => {
 
         
        
-        <img src="logo.svg" className="w-28 h-auto "></img>
-        <div className="flex  items-center justify-center  text-center w-full h-auto p-16 gap-6">
+        <img src="logo.svg" className="w-60 h-auto "></img>
+        <div className="flex  items-center justify-center  text-center w-full h-auto p-5 gap-20">
         <Link 
         to="/chat"
-        className="flex flex-col items-center justify-center w-44 h-44 border-2 border-gray-300 text-[#2e323a] rounded-full  hover:shadow-md transition">
+        className="flex flex-col items-center justify-center w-44 h-44  bg-[#8ab7e2] text-white rounded-full   hover:border-[#adf3f6] border-gray-300 border-4  transition">
         <FaKeyboard className="w-8 h-8 mb-1" />
-        <span className="text-sm">टाइप गर्नुहोस्</span>
+        <span className="text-sm  font-semibold">टाइप गर्नुहोस्</span>
       </Link>
         <div className='flex items-center justify-center flex-col'>
             <img src="robo.svg" className="w-auto h-[30svh] -ml-4"></img>
-          <img src="namaste.svg" className="w-24  h-auto "></img>
-          <p className="text-lg text-gray-500">म तपाईंलाई कसरी सहायता गर्न सक्छु?</p>
+          <img src="namaste.svg" className="w-24 mt-5  h-auto "></img>
+          <p className="text-lg text-gray-500 ">म तपाईंलाई कसरी सहायता गर्न सक्छु?</p>
           </div>
           <Link 
         to="/chat"
-        className="flex flex-col items-center justify-center w-44 h-44 border-2 border-gray-300 text-[#2e323a] rounded-full  hover:shadow-md transition">
+        className="flex flex-col items-center justify-center w-44 h-44  bg-[#8ab7e2] text-white rounded-full   hover:border-[#adf3f6] border-gray-300 border-4  transition">
         <FaMicrophone className="w-8 h-8 mb-1" />
-        <span className="text-sm">रेकर्ड गर्नुहोस्</span>
+        <span className="text-sm mt-2 font-semibold">रेकर्ड गर्नुहोस्</span>
       </Link>
         </div>
        
