@@ -9,6 +9,8 @@ const VoiceUI = () => {
   const [waveformData, setWaveformData] = useState(new Array(200).fill(50));
   const [error, setError] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [responseAudio, setResponseAudio] = useState(null);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const audioContextRef = useRef(null);
   const analyserRef = useRef(null);
@@ -18,9 +20,9 @@ const VoiceUI = () => {
   const waveformRef = useRef(null);
   const mediaRecorderRef = useRef(null);
   const recordedChunksRef = useRef([]);
-  const audioRef = useRef(null); // Ref for the <audio> element
+  const audioRef = useRef(null);
+  const responseAudioRef = useRef(null);
 
-  // Cleanup function
   const cleanup = useCallback(() => {
     if (mediaRecorderRef.current?.state !== "inactive") {
       mediaRecorderRef.current?.stop();
@@ -37,11 +39,68 @@ const VoiceUI = () => {
     if (audioUrl) {
       URL.revokeObjectURL(audioUrl);
     }
-  }, [audioUrl]);
+    if (responseAudio) {
+      URL.revokeObjectURL(responseAudio);
+    }
+  }, [audioUrl, responseAudio]);
 
   useEffect(() => {
     return cleanup;
   }, [cleanup]);
+
+  const handleSTT = async (audioBlob) => {
+    setIsProcessing(true);
+    const formData = new FormData();
+    formData.append('file', audioBlob, 'recording.wav');
+    try {
+      const sttResponse = await fetch('/api/stt', {
+        method: 'POST',
+        body: formData,
+        headers:{
+          'Accept': 'application/json',
+          // 'Content-Type': 'multipart/form-data'
+        }
+      });
+      if (!sttResponse.ok) throw new Error('STT API failed');
+      const response = await sttResponse.json();
+      const text = response.text;
+      
+      const chatResponse = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          "mode":"voice",
+          "user_input": text,
+          "history": []
+         })
+      });
+      if (!chatResponse.ok) throw new Error('Chat API failed');
+      const { answer } = await chatResponse.json();
+      
+      const ttsResponse = await fetch('/api/tts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: answer })
+      });
+      if (!ttsResponse.ok) throw new Error('TTS API failed');
+      
+      const audioBlob = await ttsResponse.blob();
+      const audioUrl = URL.createObjectURL(audioBlob);
+      
+      if (responseAudio) {
+        URL.revokeObjectURL(responseAudio);
+      }
+      
+      setResponseAudio(audioUrl);
+      
+      const audio = new Audio(audioUrl);
+      audio.play();
+    } catch (err) {
+      setError("API Error: " + err.message);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
 
   const analyzeAudio = useCallback(() => {
     if (!analyserRef.current) return;
@@ -67,13 +126,12 @@ const VoiceUI = () => {
     try {
       cleanup();
       setError(null);
+      setResponseAudio(null);
 
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       mediaStreamRef.current = stream;
 
-      // Initialize audio context
-      audioContextRef.current = new (window.AudioContext ||
-        window.webkitAudioContext)();
+      audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)();
       analyserRef.current = audioContextRef.current.createAnalyser();
       analyserRef.current.fftSize = 512;
       analyserRef.current.smoothingTimeConstant = 0.8;
@@ -81,18 +139,11 @@ const VoiceUI = () => {
       const source = audioContextRef.current.createMediaStreamSource(stream);
       source.connect(analyserRef.current);
 
-      // Initialize MediaRecorder
       const mimeType = MediaRecorder.isTypeSupported("audio/webm;codecs=opus")
         ? "audio/webm;codecs=opus"
         : MediaRecorder.isTypeSupported("audio/webm")
         ? "audio/webm"
-        : MediaRecorder.isTypeSupported("audio/mp4")
-        ? "audio/mp4"
-        : null;
-
-      if (!mimeType) {
-        throw new Error("No supported mimeType for audio recording");
-      }
+        : "audio/mp4";
 
       mediaRecorderRef.current = new MediaRecorder(stream, { mimeType });
       recordedChunksRef.current = [];
@@ -105,9 +156,10 @@ const VoiceUI = () => {
 
       mediaRecorderRef.current.onstop = async () => {
         const blob = new Blob(recordedChunksRef.current, { type: mimeType });
-        const wavBlob = await convertToWav(blob); // Convert to WAV
+        const wavBlob = await convertToWav(blob);
         const url = URL.createObjectURL(wavBlob);
         setAudioUrl(url);
+        handleSTT(wavBlob);
       };
 
       mediaRecorderRef.current.start();
@@ -130,10 +182,7 @@ const VoiceUI = () => {
     const arrayBuffer = await blob.arrayBuffer();
     const audioContext = new (window.AudioContext || window.webkitAudioContext)();
     const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
-
-    // Encode audio buffer to WAV
-    const wavBlob = encodeWav(audioBuffer);
-    return wavBlob;
+    return encodeWav(audioBuffer);
   };
 
   const encodeWav = (audioBuffer) => {
@@ -142,43 +191,41 @@ const VoiceUI = () => {
     const bitsPerSample = 16;
     const byteRate = (sampleRate * numChannels * bitsPerSample) / 8;
     const blockAlign = (numChannels * bitsPerSample) / 8;
-    const dataLength = audioBuffer.length * numChannels * 2; // 2 bytes per sample
+    const dataLength = audioBuffer.length * numChannels * 2;
 
     const buffer = new ArrayBuffer(44 + dataLength);
     const view = new DataView(buffer);
 
-    // Write WAV header
-    writeString(view, 0, "RIFF"); // RIFF header
-    view.setUint32(4, 36 + dataLength, true); // File size
-    writeString(view, 8, "WAVE"); // WAVE format
-    writeString(view, 12, "fmt "); // fmt chunk
-    view.setUint32(16, 16, true); // fmt chunk size
-    view.setUint16(20, 1, true); // Audio format (1 = PCM)
-    view.setUint16(22, numChannels, true); // Number of channels
-    view.setUint32(24, sampleRate, true); // Sample rate
-    view.setUint32(28, byteRate, true); // Byte rate
-    view.setUint16(32, blockAlign, true); // Block align
-    view.setUint16(34, bitsPerSample, true); // Bits per sample
-    writeString(view, 36, "data"); // data chunk
-    view.setUint32(40, dataLength, true); // data chunk size
+    const writeString = (offset, string) => {
+      for (let i = 0; i < string.length; i++) {
+        view.setUint8(offset + i, string.charCodeAt(i));
+      }
+    };
 
-    // Write audio data
+    writeString(0, "RIFF");
+    view.setUint32(4, 36 + dataLength, true);
+    writeString(8, "WAVE");
+    writeString(12, "fmt ");
+    view.setUint32(16, 16, true);
+    view.setUint16(20, 1, true);
+    view.setUint16(22, numChannels, true);
+    view.setUint32(24, sampleRate, true);
+    view.setUint32(28, byteRate, true);
+    view.setUint16(32, blockAlign, true);
+    view.setUint16(34, bitsPerSample, true);
+    writeString(36, "data");
+    view.setUint32(40, dataLength, true);
+
     let offset = 44;
     for (let i = 0; i < audioBuffer.length; i++) {
       for (let channel = 0; channel < numChannels; channel++) {
-        const sample = Math.max(-1, Math.min(1, audioBuffer.getChannelData(channel)[i])); // Clamp sample
-        view.setInt16(offset, sample < 0 ? sample * 0x8000 : sample * 0x7fff, true); // Convert to 16-bit
+        const sample = Math.max(-1, Math.min(1, audioBuffer.getChannelData(channel)[i]));
+        view.setInt16(offset, sample < 0 ? sample * 0x8000 : sample * 0x7fff, true);
         offset += 2;
       }
     }
 
     return new Blob([view], { type: "audio/wav" });
-  };
-
-  const writeString = (view, offset, string) => {
-    for (let i = 0; i < string.length; i++) {
-      view.setUint8(offset + i, string.charCodeAt(i));
-    }
   };
 
   const handlePlay = () => {
@@ -198,9 +245,7 @@ const VoiceUI = () => {
 
   const handleDownload = () => {
     if (!audioUrl) return;
-
     const a = document.createElement("a");
-    a.style.display = "none";
     a.href = audioUrl;
     a.download = "recording.wav";
     document.body.appendChild(a);
@@ -217,43 +262,45 @@ const VoiceUI = () => {
   }, [isRecording, startRecording, stopRecording]);
 
   return (
-    <div
-      className="min-h-screen flex flex-col items-center justify-center relative"
-      style={{ background: "linear-gradient(to bottom, #90bbe8, #FFFFFF)" }}
-    >
+    <div className="min-h-screen flex flex-col items-center justify-center relative bg-gradient-to-b from-[#90bbe8] to-white">
       {error && (
         <div className="absolute top-4 left-4 bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded-md">
           {error}
         </div>
       )}
+      
       <div className="pl-6 absolute top-0 left-0 items-start rounded-lg z-10">
-          <Link to="/">
-            <img src="/logo.svg" className="w-32 h-auto cursor-pointer" alt="Logo" />
-          </Link>
+        <Link to="/">
+          <img src="/logo.svg" className="w-32 h-auto cursor-pointer" alt="Logo" />
+        </Link>
       </div>
+      
       <Link
         to="/chat"
-        className="absolute top-7 right-6 p-3 px-4 bg-white/90 hover:bg-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center gap-2"
-        style={{ border: "2px solid #90bbe8" }}
+        className="absolute top-7 right-6 p-3 px-4 bg-white/90 hover:bg-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center gap-2 border-2 border-[#90bbe8]"
       >
-  <span className="text-[#8ab7e2] font-black pr-6 text-xl">च्याटमा जानुहोस्</span>
+        <span className="text-[#8ab7e2] font-black pr-6 text-xl">च्याटमा जानुहोस्</span>
         <FaArrowRight className="text-[#8ab7e2]" size={20} />
       </Link>
-      {/* Circle Container */}
+
       <div className="relative flex items-center justify-center w-72 h-72 rounded-full border-4 border-blue-400">
         <Waveform waveformData={waveformData} waveformRef={waveformRef} />
-        {/* Robo SVG placed at the center */}
         <div className="absolute flex items-center justify-center w-full h-full">
           <img src="/robo.svg" alt="robo" className="w-52 h-auto pr-6" />
         </div>
       </div>
-      {/* Recording and Stop Buttons */}
+
       <div className="flex space-x-4 mt-8">
         <button
           className="p-3 bg-blue-400 hover:bg-blue-500 rounded-full shadow-lg transition-all duration-300"
           onClick={() => setIsRecording(!isRecording)}
+          disabled={isProcessing}
         >
-          {isRecording ? <FaTimes size={24} className="text-white" /> : <FaMicrophone size={24} className="text-white" />}
+          {isRecording ? (
+            <FaTimes size={24} className="text-white" />
+          ) : (
+            <FaMicrophone size={24} className="text-white" />
+          )}
         </button>
 
         {audioUrl && !isRecording && (
@@ -282,10 +329,23 @@ const VoiceUI = () => {
         )}
       </div>
 
-      {/* Audio Player */}
       {audioUrl && !isRecording && (
         <div className="mt-4">
+          <h3 className="text-lg font-semibold mb-2">Your Message:</h3>
           <audio ref={audioRef} src={audioUrl} controls />
+        </div>
+      )}
+
+      {responseAudio && !isRecording && (
+        <div className="mt-4">
+          <h3 className="text-lg font-semibold mb-2">Response:</h3>
+          <audio ref={responseAudioRef} src={responseAudio} controls />
+        </div>
+      )}
+
+      {isProcessing && (
+        <div className="mt-4 text-blue-600 font-semibold">
+          Processing your message...
         </div>
       )}
     </div>
