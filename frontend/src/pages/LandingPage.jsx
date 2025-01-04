@@ -28,7 +28,7 @@ const LandingPage = () => {
           <p className="text-lg text-gray-500 ">म तपाईंलाई कसरी सहायता गर्न सक्छु?</p>
           </div>
           <Link 
-        to="/chat"
+        to="/voice"
         className="flex flex-col items-center justify-center w-44 h-44  bg-[#8ab7e2] text-white rounded-full   hover:border-[#adf3f6] border-gray-300 border-4  transition">
         <FaMicrophone className="w-8 h-8 mb-1" />
         <span className="text-sm mt-2 font-semibold">रेकर्ड गर्नुहोस्</span>

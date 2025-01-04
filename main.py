@@ -4,6 +4,8 @@ from fastapi import status
 from fastapi.staticfiles import StaticFiles
 from pathlib import Path
 
+import subprocess
+
 from server.index_docs import generate_data_store
 from server.inference import getResponseFromModel
 from server.speechprocessing import speech_to_text_from_azure, text_to_speech_from_azure
@@ -90,7 +92,19 @@ async def text_to_speech(request: TTSRequest):
     # Return the generated audio file as a response
     return FileResponse(speech_output_path, media_type="audio/wav", headers={"Content-Disposition": "attachment; filename=output_audio.wav"})
 
+
+import subprocess
+
+def build_frontend():
+    try:
+        # Navigate to the frontend directory, install dependencies, and build
+        subprocess.run(["cd", "frontend", "&&", "npm", "i", "&&", "npm", "run", "build"], shell=True, check=True)
+        print("Frontend built successfully!")
+    except subprocess.CalledProcessError as e:
+        print(f"Error during frontend build: {e}")
+
 if __name__ == "__main__":
     generate_data_store()
+    build_frontend()
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
