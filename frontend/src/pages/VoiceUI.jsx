@@ -10,6 +10,11 @@ const VoiceUI = () => {
   const [error, setError] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [responseAudio, setResponseAudio] = useState(null);
+  // const [transcriptionHistory, setTranscriptionHistory] = useState([]);
+
+  const responseAudioContextRef = useRef(null);
+  const responseAnalyserRef = useRef(null);
+  const responseSourceRef = useRef(null);
   const [isProcessing, setIsProcessing] = useState(false);
 
   const audioContextRef = useRef(null);
@@ -39,15 +44,61 @@ const VoiceUI = () => {
     if (audioUrl) {
       URL.revokeObjectURL(audioUrl);
     }
+    if (responseAudioContextRef.current?.state !== "closed") {
+      responseAudioContextRef.current?.close();
+    }
+
     if (responseAudio) {
       URL.revokeObjectURL(responseAudio);
     }
   }, [audioUrl, responseAudio]);
 
+
+  const analyzeResponseAudio = useCallback(() => {
+    if (!responseAnalyserRef.current) return;
+
+    const dataArray = new Uint8Array(responseAnalyserRef.current.frequencyBinCount);
+    responseAnalyserRef.current.getByteTimeDomainData(dataArray);
+
+    const processedData = Array.from(dataArray).map((value, index) => {
+      const newValue = ((value - 128) / 128) * 50 + 50;
+      const previousValue = previousDataRef.current[index] || 50;
+      return previousValue + (newValue - previousValue) * 0.3;
+    });
+
+    previousDataRef.current = processedData;
+    setWaveformData(processedData);
+
+    animationFrameRef.current = requestAnimationFrame(analyzeResponseAudio);
+  }, []);
+
   useEffect(() => {
     return cleanup;
   }, [cleanup]);
+  useEffect(() => {
+    if (responseAudio) {
+      responseAudioContextRef.current = new (window.AudioContext || window.webkitAudioContext)();
+      responseAnalyserRef.current = responseAudioContextRef.current.createAnalyser();
+      responseAnalyserRef.current.fftSize = 512;
+      responseAnalyserRef.current.smoothingTimeConstant = 0.8;
 
+      const audio = new Audio(responseAudio);
+      audio.addEventListener('play', () => {
+        responseSourceRef.current = responseAudioContextRef.current.createMediaElementSource(audio);
+        responseSourceRef.current.connect(responseAnalyserRef.current);
+        responseAnalyserRef.current.connect(responseAudioContextRef.current.destination);
+        analyzeResponseAudio();
+      });
+
+      audio.addEventListener('ended', () => {
+        cancelAnimationFrame(animationFrameRef.current);
+        setWaveformData(new Array(200).fill(50));
+      });
+
+      audio.play();
+    }
+
+  }, [responseAudio, analyzeResponseAudio]);
   const handleSTT = async (audioBlob) => {
     setIsProcessing(true);
     const formData = new FormData();
@@ -56,7 +107,7 @@ const VoiceUI = () => {
       const sttResponse = await fetch('/api/stt', {
         method: 'POST',
         body: formData,
-        headers:{
+        headers: {
           'Accept': 'application/json',
           // 'Content-Type': 'multipart/form-data'
         }
@@ -64,37 +115,37 @@ const VoiceUI = () => {
       if (!sttResponse.ok) throw new Error('STT API failed');
       const response = await sttResponse.json();
       const text = response.text;
-      
+
       const chatResponse = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          "mode":"voice",
+        body: JSON.stringify({
+          "mode": "voice",
           "user_input": text,
           "history": []
-         })
+        })
       });
       if (!chatResponse.ok) throw new Error('Chat API failed');
       const { answer } = await chatResponse.json();
-      
+
       const ttsResponse = await fetch('/api/tts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text: answer })
       });
       if (!ttsResponse.ok) throw new Error('TTS API failed');
-      
+
       const audioBlob = await ttsResponse.blob();
       const audioUrl = URL.createObjectURL(audioBlob);
-      
+
       if (responseAudio) {
         URL.revokeObjectURL(responseAudio);
       }
-      
+
       setResponseAudio(audioUrl);
-      
-      const audio = new Audio(audioUrl);
-      audio.play();
+
+      // const audio = new Audio(audioUrl);
+      // audio.play();
     } catch (err) {
       setError("API Error: " + err.message);
     } finally {
@@ -142,8 +193,8 @@ const VoiceUI = () => {
       const mimeType = MediaRecorder.isTypeSupported("audio/webm;codecs=opus")
         ? "audio/webm;codecs=opus"
         : MediaRecorder.isTypeSupported("audio/webm")
-        ? "audio/webm"
-        : "audio/mp4";
+          ? "audio/webm"
+          : "audio/mp4";
 
       mediaRecorderRef.current = new MediaRecorder(stream, { mimeType });
       recordedChunksRef.current = [];
@@ -268,13 +319,13 @@ const VoiceUI = () => {
           {error}
         </div>
       )}
-      
+
       <div className="pl-6 absolute top-0 left-0 items-start rounded-lg z-10">
         <Link to="/">
           <img src="/logo.svg" className="w-32 h-auto cursor-pointer" alt="Logo" />
         </Link>
       </div>
-      
+
       <Link
         to="/chat"
         className="absolute top-7 right-6 p-3 px-4 bg-white/90 hover:bg-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center gap-2 border-2 border-[#90bbe8]"
@@ -302,31 +353,6 @@ const VoiceUI = () => {
             <FaMicrophone size={24} className="text-white" />
           )}
         </button>
-
-        {audioUrl && !isRecording && (
-          <>
-            <button
-              className="p-3 bg-green-400 hover:bg-green-500 rounded-full shadow-lg transition-all duration-300"
-              onClick={handlePlay}
-              disabled={isPlaying}
-            >
-              <FaPlay size={24} className="text-white" />
-            </button>
-            <button
-              className="p-3 bg-red-400 hover:bg-red-500 rounded-full shadow-lg transition-all duration-300"
-              onClick={handleStop}
-              disabled={!isPlaying}
-            >
-              <FaStop size={24} className="text-white" />
-            </button>
-            <button
-              className="p-3 bg-purple-400 hover:bg-purple-500 rounded-full shadow-lg transition-all duration-300"
-              onClick={handleDownload}
-            >
-              <FaDownload size={24} className="text-white" />
-            </button>
-          </>
-        )}
       </div>
 
       {audioUrl && !isRecording && (
