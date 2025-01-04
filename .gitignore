@@ -31,5 +31,6 @@ __pycache__/
 */*/.pytest_cache/
 */*/.mypy
 
+node_modules/
 output_audio.wav
 uploaded_audio.wav
