@@ -85,5 +85,5 @@ This project is a FastAPI backend that provides:
 ---
 
 ## License
-This project is licensed under the MIT License.
-```
+This project is licensed under the [MIT License](LICENSE).
+
