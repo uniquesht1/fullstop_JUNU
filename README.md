@@ -1,9 +1,8 @@
 # JUNU: Your Government Office Voice Assistant
 
-- JUNU is a voice and chat assistant designed to help citizens navigate complex government processes with ease. It provides step-by-step guidance in Nepali and English, answering questions about required documents, fees, locations, and procedures. Built using cutting-edge technologies like GPT-powered models, Azure STT/TTS, and a user-friendly React.js interface, JUNU bridges the communication gap between citizens and government offices, saving time and reducing frustration.
-
----
-
+<p>
+  JUNU is a voice and chat assistant designed to help citizens navigate complex government processes with ease. It provides step-by-step guidance in Nepali and English, answering questions about required documents, fees, locations, and procedures. Built using cutting-edge technologies like GPT-powered models, Azure STT/TTS, and a user-friendly React.js interface, JUNU bridges the communication gap between citizens and government offices, saving time and reducing frustration.
+<p/>
 
 ## FastAPI Backend for Chat, STT, and TTS Services
 
